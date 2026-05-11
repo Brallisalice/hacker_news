@@ -23,10 +23,23 @@ class _HackerNewsListState extends State<HackerNewsList> {
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      var responseData = jsonDecode(response.body);
+      List<dynamic> ids = jsonDecode(response.body);
+      List<dynamic> first20Ids = ids.take(20).toList();
+
+      List<dynamic> loadedNews = [];
+
+      for (var id in first20Ids) {
+        String itemUrl = 'https://hacker-news.firebaseio.com/v0/item/$id.json';
+        final itemResponse = await http.get(Uri.parse(itemUrl));
+
+        if (itemResponse.statusCode == 200) {
+          var itemData = jsonDecode(itemResponse.body);
+          loadedNews.add(itemData);
+        }
+      }
 
       setState(() {
-        newsItems = responseData.take(20).toList();
+        newsItems = loadedNews;
       });
     }
   }
@@ -42,7 +55,8 @@ class _HackerNewsListState extends State<HackerNewsList> {
               itemBuilder: (context, index) {
                 return ListTile(
                   leading: Icon(Icons.article),
-                  title: Text(newsItems[index].toString()),
+                  title: Text(newsItems[index]['title'] ?? 'No title'),
+                  subtitle: Text('By: ${newsItems[index]['by']}'),
                 );
               },
             ),
