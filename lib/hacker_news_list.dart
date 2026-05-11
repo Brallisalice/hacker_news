@@ -26,7 +26,7 @@ class _HackerNewsListState extends State<HackerNewsList> {
       var responseData = jsonDecode(response.body);
 
       setState(() {
-        newsItems = responseData;
+        newsItems = responseData.take(20).toList();
       });
     }
   }
