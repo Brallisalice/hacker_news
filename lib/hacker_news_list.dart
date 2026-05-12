@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
 
 class HackerNewsList extends StatefulWidget {
   const HackerNewsList({super.key});
@@ -44,21 +45,44 @@ class _HackerNewsListState extends State<HackerNewsList> {
     }
   }
 
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $urlString');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Hacker News')),
       body: newsItems.isEmpty
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: newsItems.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: Icon(Icons.article),
-                  title: Text(newsItems[index]['title'] ?? 'No title'),
-                  subtitle: Text('By: ${newsItems[index]['by']}'),
-                );
-              },
+          : RefreshIndicator(
+              onRefresh: getNews,
+              child: ListView.builder(
+                itemCount: newsItems.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    leading: Icon(Icons.article),
+                    title: Text(newsItems[index]['title'] ?? 'No title'),
+                    subtitle: Text('By: ${newsItems[index]['by']}'),
+                    onTap: () async {
+                      String? articleUrl = newsItems[index]['url'];
+
+                      if (articleUrl != null) {
+                        try {
+                          await _launchUrl(articleUrl);
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Could not open the link')),
+                          );
+                        }
+                      }
+                    },
+                  );
+                },
+              ),
             ),
     );
   }
