@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hacker_news/widgets/news_tile.dart';
+import 'package:hacker_news/models/article.dart';
 
 class HackerNewsList extends StatefulWidget {
   const HackerNewsList({super.key});
@@ -45,10 +47,9 @@ class _HackerNewsListState extends State<HackerNewsList> {
     }
   }
 
-  Future<void> _launchUrl(String urlString) async {
-    final Uri url = Uri.parse(urlString);
+  Future<void> _launchUrl(Uri url) async {
     if (!await launchUrl(url)) {
-      throw Exception('Could not launch $urlString');
+      throw Exception('Could not launch $url');
     }
   }
 
@@ -63,24 +64,8 @@ class _HackerNewsListState extends State<HackerNewsList> {
               child: ListView.builder(
                 itemCount: newsItems.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: Icon(Icons.article),
-                    title: Text(newsItems[index]['title'] ?? 'No title'),
-                    subtitle: Text('By: ${newsItems[index]['by']}'),
-                    onTap: () async {
-                      String? articleUrl = newsItems[index]['url'];
-
-                      if (articleUrl != null) {
-                        try {
-                          await _launchUrl(articleUrl);
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Could not open the link')),
-                          );
-                        }
-                      }
-                    },
-                  );
+                  final Article article = Article.fromJson(newsItems[index]);
+                  return NewsTile(onLaunch: _launchUrl, article: article);
                 },
               ),
             ),

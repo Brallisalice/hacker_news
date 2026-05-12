@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'hacker_news_list.dart';
+import 'screens/hacker_news_list.dart';
 
 void main() {
   runApp(const MyApp());
