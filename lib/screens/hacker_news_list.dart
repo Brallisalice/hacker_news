@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:hacker_news/service/news_service.dart';
 import 'package:hacker_news/widgets/news_tile.dart';
 import 'package:hacker_news/models/article.dart';
 
@@ -14,6 +12,9 @@ class HackerNewsList extends StatefulWidget {
 
 class _HackerNewsListState extends State<HackerNewsList> {
   List<dynamic> newsItems = []; // skapar en lista för att spara nyheterna
+  final NewsService _newsService = NewsService();
+  List<Article> _articles = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -22,34 +23,21 @@ class _HackerNewsListState extends State<HackerNewsList> {
   }
 
   Future<void> getNews() async {
-    String url = 'https://hacker-news.firebaseio.com/v0/newstories.json';
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      List<dynamic> ids = jsonDecode(response.body);
-      List<dynamic> first20Ids = ids.take(20).toList();
-
-      List<dynamic> loadedNews = [];
-
-      for (var id in first20Ids) {
-        String itemUrl = 'https://hacker-news.firebaseio.com/v0/item/$id.json';
-        final itemResponse = await http.get(Uri.parse(itemUrl));
-
-        if (itemResponse.statusCode == 200) {
-          var itemData = jsonDecode(itemResponse.body);
-          loadedNews.add(itemData);
-        }
-      }
-
+    try {
+      final articles = await _newsService.fetchNewStories();
       setState(() {
-        newsItems = loadedNews;
+        _articles = articles;
+        _isLoading = false;
       });
-    }
-  }
-
-  Future<void> _launchUrl(Uri url) async {
-    if (!await launchUrl(url)) {
-      throw Exception('Could not launch $url');
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Could not load news')));
+        }
+      });
     }
   }
 
@@ -57,15 +45,14 @@ class _HackerNewsListState extends State<HackerNewsList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Hacker News')),
-      body: newsItems.isEmpty
+      body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: getNews,
               child: ListView.builder(
-                itemCount: newsItems.length,
+                itemCount: _articles.length,
                 itemBuilder: (context, index) {
-                  final Article article = Article.fromJson(newsItems[index]);
-                  return NewsTile(onLaunch: _launchUrl, article: article);
+                  return NewsTile(article: _articles[index]);
                 },
               ),
             ),
