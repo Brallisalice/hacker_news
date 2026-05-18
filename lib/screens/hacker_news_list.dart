@@ -24,7 +24,7 @@ class _HackerNewsListState extends State<HackerNewsList> {
 
   Future<void> getNews() async {
     try {
-      final articles = await _newsService.fetchNewStories();
+      final articles = await _newsService.fetchTopStories();
       setState(() {
         _articles = articles;
         _isLoading = false;
