@@ -26,7 +26,6 @@ class ArticleDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(article.title),
         actions: [
-          // ADDED: The button to open the external link
           if (article.url != null)
             IconButton(
               icon: const Icon(Icons.open_in_browser),
