@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hacker_news/models/article.dart';
+import 'package:hacker_news/models/comment.dart';
+import 'package:hacker_news/service/news_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hacker_news/utils/date_formatter.dart';
 
@@ -50,6 +52,22 @@ class ArticleDetailScreen extends StatelessWidget {
           ],
           Text('${article.descendants} Comments'),
           Divider(),
+          if (article.kids != null && article.kids!.isNotEmpty)
+            FutureBuilder<Comment>(
+              future: NewsService().fetchComment(article.kids!.first),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Text('Could not load comments');
+                }
+
+                final comment = snapshot.data!;
+                return Text(comment.text!);
+              },
+            ),
         ],
       ),
     );
