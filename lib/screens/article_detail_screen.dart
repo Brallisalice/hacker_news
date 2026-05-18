@@ -4,6 +4,7 @@ import 'package:hacker_news/models/comment.dart';
 import 'package:hacker_news/service/news_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hacker_news/utils/date_formatter.dart';
+import 'package:hacker_news/widgets/comment_tile.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   const ArticleDetailScreen({super.key, required this.article});
@@ -74,7 +75,7 @@ class ArticleDetailScreen extends StatelessWidget {
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   children: comments
-                      .map((comment) => Text(comment.text ?? ''))
+                      .map((comment) => CommentTile(comment: comment))
                       .toList(),
                 );
               },
