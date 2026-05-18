@@ -5,6 +5,7 @@ import 'package:hacker_news/service/news_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hacker_news/utils/date_formatter.dart';
 import 'package:hacker_news/widgets/comment_tile.dart';
+import 'package:hacker_news/utils/text_formatter.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   const ArticleDetailScreen({super.key, required this.article});
@@ -48,7 +49,7 @@ class ArticleDetailScreen extends StatelessWidget {
             height: 10,
           ), // If the article has text (like an "Ask HN" post), show it.
           if (article.text != null && article.text!.isNotEmpty) ...[
-            Text(article.text!),
+            Text(TextFormatter.parseHtmlString(article.text ?? '')),
             const SizedBox(height: 24),
           ],
           Text('${article.descendants} Comments'),
