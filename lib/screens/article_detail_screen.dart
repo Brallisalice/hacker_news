@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hacker_news/models/article.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hacker_news/utils/date_formatter.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   const ArticleDetailScreen({super.key, required this.article});
@@ -37,7 +38,9 @@ class ArticleDetailScreen extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.all(16.0),
         children: [
-          Text('By: ${article.by}'),
+          Text(
+            '${article.score} points by: ${article.by}  ${DateFormatter.timeAgo(article.time)}',
+          ),
           Divider(
             height: 10,
           ), // If the article has text (like an "Ask HN" post), show it.
@@ -45,7 +48,7 @@ class ArticleDetailScreen extends StatelessWidget {
             Text(article.text!),
             const SizedBox(height: 24),
           ],
-          Text('${article.kids?.length ?? 0} Comments'),
+          Text('${article.descendants} Comments'),
           Divider(),
         ],
       ),
