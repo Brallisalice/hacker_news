@@ -53,8 +53,13 @@ class ArticleDetailScreen extends StatelessWidget {
           Text('${article.descendants} Comments'),
           Divider(),
           if (article.kids != null && article.kids!.isNotEmpty)
-            FutureBuilder<Comment>(
-              future: NewsService().fetchComment(article.kids!.first),
+            FutureBuilder<List<Comment>>(
+              // display all the comments with Future.wait
+              future: Future.wait(
+                article.kids!
+                    .map((id) => NewsService().fetchComment(id))
+                    .toList(),
+              ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -64,8 +69,14 @@ class ArticleDetailScreen extends StatelessWidget {
                   return Text('Could not load comments');
                 }
 
-                final comment = snapshot.data!;
-                return Text(comment.text!);
+                final comments = snapshot.data!;
+                return ListView(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: comments
+                      .map((comment) => Text(comment.text ?? ''))
+                      .toList(),
+                );
               },
             ),
         ],
