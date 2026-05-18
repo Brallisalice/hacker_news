@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:hacker_news/models/comment.dart';
 import 'package:hacker_news/utils/date_formatter.dart';
+import 'package:html/parser.dart' as html_parser;
 
 class CommentTile extends StatelessWidget {
   final Comment comment;
 
   const CommentTile({super.key, required this.comment});
+
+  String _parseHtmlString(String htmlString) {
+    final document = html_parser.parse(htmlString);
+    return document.body?.text ?? '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +31,7 @@ class CommentTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text(comment.text ?? ''),
+            Text(_parseHtmlString(comment.text ?? '')),
           ],
         ),
       ),
