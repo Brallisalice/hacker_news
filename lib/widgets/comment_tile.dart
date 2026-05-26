@@ -10,25 +10,23 @@ class CommentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'By: ${comment.by}  ${DateFormatter.timeAgo(comment.time)}',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'By: ${comment.by}  ${DateFormatter.timeAgo(comment.time)}',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 8),
-            Text(TextFormatter.parseHtmlString(comment.text ?? '')),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Text(TextFormatter.parseHtmlString(comment.text ?? '')),
+          Divider(),
+        ],
       ),
     );
   }

@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:hacker_news/utils/date_formatter.dart';
 import 'package:hacker_news/widgets/comment_tile.dart';
 import 'package:hacker_news/utils/text_formatter.dart';
+import 'package:hacker_news/providers/bookmark_provider.dart';
+import 'package:provider/provider.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   const ArticleDetailScreen({super.key, required this.article});
@@ -27,6 +29,13 @@ class ArticleDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bookmarkProvider = context
+        .watch<
+          BookmarkProvider
+        >(); // Every time the provider notifies, this screen rebuilds because of context.watch
+    final isBookmarked = bookmarkProvider.bookmarkedIds.contains(
+      article.id.toString(),
+    ); // Check if this specific article is already saved
     return Scaffold(
       appBar: AppBar(
         title: Text(article.title),
@@ -37,6 +46,15 @@ class ArticleDetailScreen extends StatelessWidget {
               onPressed: () => _launchUrl(context),
               tooltip: 'Open in browser',
             ),
+          IconButton(
+            icon: Icon(
+              isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              color: isBookmarked ? Colors.amber : null,
+            ), // Toggle icon look based on bookmark state
+            onPressed: () {
+              bookmarkProvider.toggleBookmark(article.id.toString());
+            },
+          ),
         ],
       ),
       body: ListView(
