@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hacker_news/screens/bookmark_screen.dart';
 import 'package:hacker_news/service/news_service.dart';
 import 'package:hacker_news/widgets/news_tile.dart';
 import 'package:hacker_news/models/article.dart';
@@ -11,7 +12,7 @@ class HackerNewsList extends StatefulWidget {
 }
 
 class _HackerNewsListState extends State<HackerNewsList> {
-  List<dynamic> newsItems = []; // skapar en lista för att spara nyheterna
+  List<dynamic> newsItems = [];
   final NewsService _newsService = NewsService();
   List<Article> _articles = [];
   bool _isLoading = true;
@@ -44,7 +45,21 @@ class _HackerNewsListState extends State<HackerNewsList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Hacker News')),
+      appBar: AppBar(
+        title: Text('Hacker News'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.bookmark),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => BookmarkScreen()),
+              );
+            },
+            tooltip: 'View Saved Articles',
+          ),
+        ],
+      ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(

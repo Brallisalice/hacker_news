@@ -29,13 +29,16 @@ class ArticleDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final newsService = NewsService();
     final bookmarkProvider = context
         .watch<
           BookmarkProvider
         >(); // Every time the provider notifies, this screen rebuilds because of context.watch
-    final isBookmarked = bookmarkProvider.bookmarkedIds.contains(
-      article.id.toString(),
-    ); // Check if this specific article is already saved
+    // Check if any saved article shares the same unique ID as this one
+    final isBookmarked = bookmarkProvider.bookmarkedArticles.any(
+      (a) => a.id == article.id,
+    );
+    // Check if this specific article is already saved
     return Scaffold(
       appBar: AppBar(
         title: Text(article.title),
@@ -52,7 +55,7 @@ class ArticleDetailScreen extends StatelessWidget {
               color: isBookmarked ? Colors.amber : null,
             ), // Toggle icon look based on bookmark state
             onPressed: () {
-              bookmarkProvider.toggleBookmark(article.id.toString());
+              bookmarkProvider.toggleBookmark(article);
             },
           ),
         ],
@@ -77,7 +80,7 @@ class ArticleDetailScreen extends StatelessWidget {
               // display all the comments with Future.wait
               future: Future.wait(
                 article.kids!
-                    .map((id) => NewsService().fetchComment(id))
+                    .map((id) => newsService.fetchComment(id))
                     .toList(),
               ),
               builder: (context, snapshot) {

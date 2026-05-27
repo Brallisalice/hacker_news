@@ -35,4 +35,18 @@ class Article {
       descendants: json['descendants'] ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'by': by,
+      'url': url,
+      'text': text,
+      'id': id,
+      'kids': kids,
+      'score': score,
+      'time': time,
+      'descendants': descendants,
+    };
+  }
 }
