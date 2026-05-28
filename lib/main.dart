@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hacker_news/providers/bookmark_provider.dart';
 import 'package:provider/provider.dart';
 import 'screens/hacker_news_list.dart';
+import 'package:hacker_news/themes/app_theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<BookmarkProvider>(
       create: (context) => BookmarkProvider(),
-      child: MaterialApp(home: HackerNewsList()),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        home: HackerNewsList(),
+      ),
     );
   }
 }
