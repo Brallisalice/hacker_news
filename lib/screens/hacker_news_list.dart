@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hacker_news/screens/bookmark_screen.dart';
+import 'package:hacker_news/screens/search_screen.dart';
 import 'package:hacker_news/service/news_service.dart';
 import 'package:hacker_news/widgets/news_tile.dart';
 import 'package:hacker_news/models/article.dart';
@@ -57,6 +58,15 @@ class _HackerNewsListState extends State<HackerNewsList> {
               );
             },
             tooltip: 'View Saved Articles',
+          ),
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SearchScreen()),
+              );
+            },
           ),
         ],
       ),
