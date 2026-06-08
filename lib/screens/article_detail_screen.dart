@@ -8,6 +8,7 @@ import 'package:hacker_news/widgets/comment_tile.dart';
 import 'package:hacker_news/utils/text_formatter.dart';
 import 'package:hacker_news/providers/bookmark_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   const ArticleDetailScreen({super.key, required this.article});
@@ -56,6 +57,18 @@ class ArticleDetailScreen extends StatelessWidget {
             ), // Toggle icon look based on bookmark state
             onPressed: () {
               bookmarkProvider.toggleBookmark(article);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: () {
+              if (article.url != null) {
+                SharePlus.instance.share(
+                  ShareParams(uri: Uri.parse(article.url!)),
+                );
+              } else {
+                SharePlus.instance.share(ShareParams(text: article.title));
+              }
             },
           ),
         ],
