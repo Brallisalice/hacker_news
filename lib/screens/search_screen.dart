@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/search_provider.dart';
 import '../screens/article_detail_screen.dart';
+import 'package:hacker_news/widgets/shimmer_wrapper.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -53,10 +54,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   Consumer<SearchProvider>(
                     builder: (context, searchProvider, child) {
                       if (searchProvider.isLoading) {
-                        return const Padding(
-                          padding: EdgeInsets.all(32.0),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
+                        return const ArticleListSkeleton();
                       }
 
                       if (searchProvider.searchResults.isEmpty &&

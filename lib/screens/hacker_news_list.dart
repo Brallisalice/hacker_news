@@ -4,6 +4,7 @@ import 'package:hacker_news/screens/search_screen.dart';
 import 'package:hacker_news/service/news_service.dart';
 import 'package:hacker_news/widgets/news_tile.dart';
 import 'package:hacker_news/models/article.dart';
+import 'package:hacker_news/widgets/shimmer_wrapper.dart';
 
 class HackerNewsList extends StatefulWidget {
   const HackerNewsList({super.key});
@@ -71,7 +72,7 @@ class _HackerNewsListState extends State<HackerNewsList> {
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? ArticleListSkeleton()
           : RefreshIndicator(
               onRefresh: getNews,
               child: ListView.builder(

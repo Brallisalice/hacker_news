@@ -9,6 +9,7 @@ import 'package:hacker_news/utils/text_formatter.dart';
 import 'package:hacker_news/providers/bookmark_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:hacker_news/widgets/shimmer_wrapper.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   const ArticleDetailScreen({super.key, required this.article});
@@ -98,7 +99,7 @@ class ArticleDetailScreen extends StatelessWidget {
               ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return CommentSkeleton();
                 }
 
                 if (snapshot.hasError) {
