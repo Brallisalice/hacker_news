@@ -13,21 +13,37 @@ class HackerNewsList extends StatefulWidget {
   State<HackerNewsList> createState() => _HackerNewsListState();
 }
 
+enum NewsCategory { top, best, newStories }
+
 class _HackerNewsListState extends State<HackerNewsList> {
   List<dynamic> newsItems = [];
   final NewsService _newsService = NewsService();
   List<Article> _articles = [];
   bool _isLoading = true;
+  NewsCategory _currentCategory = NewsCategory.top;
 
   @override
   void initState() {
     super.initState();
-    getNews();
+    getNews(_currentCategory);
   }
 
-  Future<void> getNews() async {
+  Future<void> getNews(NewsCategory category) async {
     try {
-      final articles = await _newsService.fetchTopStories();
+      String categoryType = 'top';
+
+      switch (category) {
+        case NewsCategory.top:
+          categoryType = 'top';
+          break;
+        case NewsCategory.best:
+          categoryType = 'best';
+          break;
+        case NewsCategory.newStories:
+          categoryType = 'new';
+          break;
+      }
+      final articles = await _newsService.fetchStories(categoryType);
       setState(() {
         _articles = articles;
         _isLoading = false;
@@ -46,42 +62,76 @@ class _HackerNewsListState extends State<HackerNewsList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Hacker News'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.bookmark),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => BookmarkScreen()),
-              );
-            },
-            tooltip: 'View Saved Articles',
-          ),
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SearchScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? ArticleListSkeleton()
-          : RefreshIndicator(
-              onRefresh: getNews,
-              child: ListView.builder(
-                itemCount: _articles.length,
-                itemBuilder: (context, index) {
-                  return NewsTile(article: _articles[index]);
-                },
-              ),
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Hacker News'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.bookmark),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BookmarkScreen()),
+                );
+              },
+              tooltip: 'View Saved Articles',
             ),
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SearchScreen()),
+                );
+              },
+            ),
+          ],
+          bottom: TabBar(
+            indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.grey,
+            onTap: (int index) {
+              if (_isLoading) return;
+              NewsCategory selectedCategory = NewsCategory.top;
+
+              switch (index) {
+                case 0:
+                  selectedCategory = NewsCategory.top;
+                  break;
+                case 1:
+                  selectedCategory = NewsCategory.best;
+                  break;
+                case 2:
+                  selectedCategory = NewsCategory.newStories;
+                  break;
+              }
+              setState(() {
+                _isLoading = true;
+                _currentCategory = selectedCategory;
+              });
+              getNews(selectedCategory);
+            },
+            tabs: [
+              Tab(text: 'TOP'),
+              Tab(text: 'BEST'),
+              Tab(text: 'NEW'),
+            ],
+          ),
+        ),
+        body: _isLoading
+            ? ArticleListSkeleton()
+            : RefreshIndicator(
+                onRefresh: () => getNews(_currentCategory),
+                child: ListView.builder(
+                  itemCount: _articles.length,
+                  itemBuilder: (context, index) {
+                    return NewsTile(article: _articles[index]);
+                  },
+                ),
+              ),
+      ),
     );
   }
 }

@@ -11,7 +11,7 @@ class BookmarkProvider with ChangeNotifier {
   UnmodifiableListView<Article> get bookmarkedArticles =>
       UnmodifiableListView(_bookmarkedArticles);
 
-  get size => _bookmarkedArticles.length;
+  int get size => _bookmarkedArticles.length;
 
   BookmarkProvider() {
     loadBookmarks();
