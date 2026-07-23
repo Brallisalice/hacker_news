@@ -22,11 +22,31 @@ class ArticleDetailScreen extends StatelessWidget {
     final Uri url = Uri.parse(article.url!);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Could not launch browser')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch browser')),
+        );
       }
     }
+  }
+
+  // Search results don't include comment IDs (kids), so re-fetch the full article if missing
+  Future<List<Comment>> _fetchComments(NewsService newsService) async {
+    List<int>? commentIds = article.kids;
+
+    if (commentIds == null || commentIds.isEmpty) {
+      final parsedId = int.tryParse(article.id) ?? 0;
+      final fullArticle = await newsService.fetchArticle(parsedId);
+      commentIds = fullArticle.kids;
+    }
+
+    if (commentIds == null || commentIds.isEmpty) {
+      return [];
+    }
+
+    // Fetch all top-level comments in parallel
+    return await Future.wait(
+      commentIds.map((id) => newsService.fetchComment(id)).toList(),
+    );
   }
 
   @override
@@ -36,11 +56,12 @@ class ArticleDetailScreen extends StatelessWidget {
         .watch<
           BookmarkProvider
         >(); // Every time the provider notifies, this screen rebuilds because of context.watch
+
     // Check if any saved article shares the same unique ID as this one
     final isBookmarked = bookmarkProvider.bookmarkedArticles.any(
       (a) => a.id == article.id,
     );
-    // Check if this specific article is already saved
+
     return Scaffold(
       appBar: AppBar(
         title: Text(article.title),
@@ -61,7 +82,7 @@ class ArticleDetailScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: Icon(Icons.share),
+            icon: const Icon(Icons.share),
             onPressed: () {
               if (article.url != null) {
                 SharePlus.instance.share(
@@ -75,12 +96,12 @@ class ArticleDetailScreen extends StatelessWidget {
         ],
       ),
       body: ListView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         children: [
           Text(
             '${article.score} points by: ${article.by}  ${DateFormatter.timeAgo(article.time)}',
           ),
-          Divider(
+          const Divider(
             height: 10,
           ), // If the article has text (like an "Ask HN" post), show it.
           if (article.text != null && article.text!.isNotEmpty) ...[
@@ -88,34 +109,38 @@ class ArticleDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
           ],
           Text('${article.descendants} Comments'),
-          Divider(),
-          if (article.kids != null && article.kids!.isNotEmpty)
-            FutureBuilder<List<Comment>>(
-              // display all the comments with Future.wait
-              future: Future.wait(
-                article.kids!
-                    .map((id) => newsService.fetchComment(id))
-                    .toList(),
-              ),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CommentSkeleton();
-                }
+          const Divider(),
 
-                if (snapshot.hasError) {
-                  return Text('Could not load comments');
-                }
+          // Display comments safely regardless of whether the article came from home or search
+          FutureBuilder<List<Comment>>(
+            future: _fetchComments(newsService),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CommentSkeleton();
+              }
 
-                final comments = snapshot.data!;
-                return ListView(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  children: comments
-                      .map((comment) => CommentTile(comment: comment))
-                      .toList(),
+              if (snapshot.hasError) {
+                return const Text('Could not load comments');
+              }
+
+              final comments = snapshot.data ?? [];
+
+              if (comments.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  child: Text('No comments yet.'),
                 );
-              },
-            ),
+              }
+
+              return ListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: comments
+                    .map((comment) => CommentTile(comment: comment))
+                    .toList(),
+              );
+            },
+          ),
         ],
       ),
     );
