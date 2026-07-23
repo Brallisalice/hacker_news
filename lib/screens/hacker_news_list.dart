@@ -91,7 +91,7 @@ class _HackerNewsListState extends State<HackerNewsList> {
           bottom: TabBar(
             indicatorColor: Colors.white,
             labelColor: Colors.white,
-            unselectedLabelColor: Colors.grey,
+            unselectedLabelColor: Colors.black,
             onTap: (int index) {
               if (_isLoading) return;
               NewsCategory selectedCategory = NewsCategory.top;

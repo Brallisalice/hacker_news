@@ -19,73 +19,89 @@ class CommentTile extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 1. The main parent comment
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 8.0,
-            vertical: 4.0,
-          ),
-          title: Text(
-            '${comment.by} • ${DateFormatter.timeAgo(comment.time)}',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. The main parent comment with vertical line
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  width: 2.0,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+                const SizedBox(width: 8.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${comment.by} • ${DateFormatter.timeAgo(comment.time)}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        TextFormatter.parseHtmlString(comment.text!),
+                        style: const TextStyle(fontSize: 14, height: 1.3),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 4.0),
-            child: Text(TextFormatter.parseHtmlString(comment.text!)),
-          ),
-        ),
 
-        // 2. THE RECURSION: If this comment has replies (kids), fetch and render them
-        if (comment.kids != null && comment.kids!.isNotEmpty)
-          Padding(
-            // This 16-pixel indentation on the left creates the visual tree hierarchy
-            padding: const EdgeInsets.only(left: 16.0),
-            child: FutureBuilder<List<Comment>>(
-              future: Future.wait(
-                comment.kids!
-                    .map((id) => _newsService.fetchComment(id))
-                    .toList(),
-              ),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  // A subtle, discrete loading indicator for child replies
-                  return const Padding(
-                    padding: EdgeInsets.only(left: 8.0, top: 4.0),
-                    child: SizedBox(
-                      width: 12,
-                      height: 12,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  );
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-
-                final childComments = snapshot.data!;
-
-                // The widget calls itself here (Recursion).
-                // Each reply renders as a new CommentTile, which in turn checks for its own replies.
-                return Column(
-                  children: childComments
-                      .map((childComment) => CommentTile(comment: childComment))
+          // 2. THE RECURSION: If this comment has replies (kids), fetch and render them
+          if (comment.kids != null && comment.kids!.isNotEmpty)
+            Padding(
+              // This 12-pixel indentation creates the clean visual tree hierarchy
+              padding: const EdgeInsets.only(left: 12.0, top: 4.0),
+              child: FutureBuilder<List<Comment>>(
+                future: Future.wait(
+                  comment.kids!
+                      .map((id) => _newsService.fetchComment(id))
                       .toList(),
-                );
-              },
+                ),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Padding(
+                      padding: EdgeInsets.only(left: 8.0, top: 4.0),
+                      child: SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    );
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  final childComments = snapshot.data!;
+
+                  return Column(
+                    children: childComments
+                        .map(
+                          (childComment) => CommentTile(comment: childComment),
+                        )
+                        .toList(),
+                  );
+                },
+              ),
             ),
-          ),
-        const Divider(
-          height: 1,
-        ), // A thin line separating main conversation threads
-      ],
+        ],
+      ),
     );
   }
 }
