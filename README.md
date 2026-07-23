@@ -1,17 +1,33 @@
-# hacker_news
+# Hacker News Client 📰
+This is my first hobby app that I made to practice coding with dart and flutter
 
-A new Flutter project.
+This app is a modern and fast Hacker News client built with Flutter. The app fetches the latest tech news in real-time via the official Hacker News API and presents it in a user-friendly interface.
 
-## Getting Started
+## ✨ Features
 
-This project is a starting point for a Flutter application.
+* **Category Switching via Tabs:** Seamlessly switch between *Top*, *Best*, and *New* stories directly in the app's AppBar.
+* **Shimmer Loading:** Modern skeleton loading (shimmer effect) displayed while data is being fetched in the background for a smoother user experience.
+* **Search Functionality:** Find specific articles quickly and easily (via `SearchScreen`).
+* **Bookmarks:** Save your favorite articles to read them later (via `BookmarkScreen`).
+* **Pull-to-Refresh:** Pull down on the screen to easily refresh the list with the absolute latest news.
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠 Technical Details & Architecture
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+This project is built with a strong focus on clean code and performance:
+* **State Management:** Combines local `setState` for UI-specific logic with global **`Providers`** to efficiently manage app-wide state, such as saved bookmarks and search results.
+* **Enums & Switch Statements:** Type-safe handling of news categories using Dart `enums` for maximum code clarity and scalability.
+* **API Optimization:** A centralized `NewsService` that efficiently maps the app's categories to API requests.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📁 Project Structure
+
+The app is structured into modules to keep the codebase clean and maintainable:
+
+```text
+lib/
+├── models/         # Data models (e.g., Article, Comment)
+├── providers/      # State Management (e.g., Bookmarks, Search)
+├── screens/        # The app's different screens/views
+├── service/        # API services and network requests
+├── themes/         # App design system and colors
+├── utils/          # Helper functions (e.g., formatting, debouncer)
+└── widgets/        # Reusable UI components (e.g., tiles, shimmers)
